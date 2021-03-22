@@ -7,10 +7,16 @@
     "build": "vue-cli-service build"
   },
   "dependencies": {
+    "axios": "^0.21.1",
+    "calf-element-dorado": "^1.1.34",
     "core-js": "^3.6.5",
+    "element-ui": "^2.15.1",
+    "mockjs": "^1.1.0",
     "vue": "^2.6.11",
     "vue-router": "^3.2.0",
-    "vuex": "^3.4.0"
+    "vuex": "^3.4.0",
+    "vxe-table": "^3.2.4",
+    "xe-utils": "^3.1.11"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.5.0",
