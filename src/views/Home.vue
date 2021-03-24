@@ -17,7 +17,9 @@
         <!-- 分销商： -->
         <span>
           <label class="label-5-width"> 分销商：</label>
-          <c-select-tree v-model="distributor" :data="distributorTreeList" :defaultProps="defaultProps" search></c-select-tree>
+          <!-- <c-select-tree v-model="distributor" :data="distributorTreeList" :defaultProps="defaultProps" search></c-select-tree> -->
+					<!-- <c-select  v-model="distributor" :data="distributorTreeList" :defaultProps="defaultProps" multiple search ></c-select> -->
+          <c-select v-model="distributor" :options="distributorTreeList" multiple search clearable idName="value" labelName="label"></c-select>
         </span>
       </div>
       
@@ -41,15 +43,9 @@
     </span>
 
     <div class="newPage">
+
     <!-- 新增退款单 -->
-      <c-icon-select @click="showDialog">
-        <template>
-					<i class="el-icon-circle-plus"> </i>
-          <span> 新增退款单</span>
-				</template>
-      </c-icon-select>
-    <!-- 新增退款单弹窗 -->
-      <add-form :show="show" @close="show=false" @pageTotal="newTotal"/>
+      <add-form @pageTotal="newTotal"/>
     <!-- 翻页 -->
       <c-pagination  :page='pageNo'  :total='total'  :pageSize='pageSize'  @pageChange='pageChange'/>
     </div>
@@ -61,6 +57,7 @@
 </template>
 
 <script>
+
 import mock from '@/mock'
 import axios from 'axios'
 import addForm from './addForm'
@@ -79,24 +76,12 @@ export default {
       // 分销订单号
       distributionOrder:undefined,
       // 分销商
-      distributor: undefined,
+      distributor: [],
       distributorTreeList: [
-        // {label: '1', value: 1,}, 
-        // {label: '2', value: 2,}, 
-        // {label: '3', value: 3 }
       ],
-      defaultProps: {
-        label: 'label',
-        value: 'value',
-      },
       // 退款时间
       startTime: undefined,
       endTime: undefined,
-
-      // 新增退款单
-      show: false,
-      showWarning: false,
-      ValueGuanlian: undefined,
 
       // 翻页
       pageNo: 1,
@@ -112,6 +97,7 @@ export default {
     methods: {
       // 查询请求
     queryClick() {
+      
       axios.post('/localhost/api/queryData',{
         shouhou:this.salesOrder,
         fenxiao:this.distributionOrder,
@@ -119,17 +105,16 @@ export default {
         startTime:this.startTime,
         endtime:this.endTime,
         params: {
-        pageindex: this.pageNo,
-        pagesize: this.pageSize,
-      }
+          pageindex: this.pageNo,
+          pagesize: this.pageSize,
+        }
       }).then(res=>{
         // 查询表格数据
-        console.log(res);
-        this.tableData = res.data.list
+        this.tableData = res.data.list;
         //查询条数 
-        this.total = res.data.total
-
-        console.log(this.distributor);
+        this.total = res.data.total;
+        this.pageNo = 1;
+        
       })
     },
 
@@ -140,11 +125,6 @@ export default {
       this.distributor = undefined, 
       this.startTime = undefined, 
       this.endTime = undefined
-    },
-
-    // 新增退款单
-    showDialog () {
-      this.show = true;
     },
    
     // 翻页
@@ -159,14 +139,12 @@ export default {
         pagesize: this.pageSize,
       }
     }).then(res => {
-      console.log(res);
       this.tableData = res.data.list;
     })
     },
     //total总条数
     newTotal(res){
       this.total = res;
-      console.log(res);
     }
   },
   created() {
@@ -212,9 +190,6 @@ export default {
   display: flex;
   margin: 10px;
   justify-content:space-between;
-  i {
-    color: #558364;
-  }
 }
 
 </style>

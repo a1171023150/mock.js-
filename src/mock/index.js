@@ -1,17 +1,17 @@
 var Mock = require('mockjs')
 
 const { tableData, fenxiaoshang, orderData } = Mock.mock({
-  'tableData|58': [{
-    tuikuan: 'TKD@natural',
+  'tableData|45-90': [{
+    tuikuan: 'TKD@natural(12345600,12345699)',
     leixing:'@pick(["其他退款", "售后退款"])',
-    tuihuokuan:'￥@float(100,900, 2, 2)',
-    youfei:'￥@float(1,9, 2, 2)',
-    heji:'￥@float(101,909, 2,2)',
+    tuihuokuan:'@float(100,900, 2, 2)',
+    youfei:'@float(1,9, 2, 2)',
+    heji:'',
     fenxiaoshang:'@pick(["分销A", "分销B", "分销C", "总部", "店铺"])',
     zeren:'@pick(["供应商", "顾客", "快递","其他"])',
     sentence:'@csentence(5,20)',
-    shouhou:'SH@natural',
-    fenxiao: 'FX@natural',
+    shouhou:'SH@natural(87654301,87654399)',
+    fenxiao: 'FX@natural(64556144,64556244)',
     time: '@datetime("2021-03-dd  HH:mm:ss")'
   }],
   fenxiaoshang:[
@@ -22,9 +22,10 @@ const { tableData, fenxiaoshang, orderData } = Mock.mock({
     {label: '直营', value: '直营'}
   ],
   'orderData|36': [{
-    fenxiao: 'FX@natural',
+    fenxiao: 'FX@natural(54132154,54132199)',
     zhuangtai:'@pick(["已发货"])',
-    youfei:'￥@float(10,20, 2, 2)(￥@natural(0,16).00)',
+    shifu:'@float(10,20, 2, 2)',
+    youfei:'@natural(0,16).00',
     time: '@datetime("2021-03-dd  HH:mm:ss")'
   }],
 })
@@ -72,18 +73,17 @@ Mock.mock(/\/localhost\/api\/tableData/,'get',(options)=>{
 // 定义post请求， 增加功能
 Mock.mock(/\/localhost\/api\/tableData/,'post',(options)=>{
   const body = JSON.parse(options.body)
-  console.log(body);
   tableData.push(Mock.mock({
-    tuikuan: 'TKD@natural',
+    tuikuan: 'TKD@natural(12345600,12345699)',
     leixing:'@pick(["其他退款", "售后退款"])',
-    tuihuokuan:body.tuihuokuan,
-    youfei:'￥@float(2,9, 2, 2)',
-    heji:'￥@float(101,909, 2,2)',
+    tuihuokuan:'@float(100,900, 2, 2)',
+    youfei:body.youfei,
+    heji:'',
     fenxiaoshang:body.fenxiaoshang,
     zeren:'@pick(["供应商", "顾客", "快递","其他"])',
     sentence:body.sentence,
-    shouhou:'SH@natural',
-    fenxiao: 'FX@natural',
+    shouhou:'SH@natural(87654301,87654399)',
+    fenxiao: 'FX@natural(64556144,64556244)',
     time: '@datetime("2021-03-dd  HH:mm:ss")'
   }))
   return{
@@ -131,22 +131,23 @@ Mock.mock(/\/localhost\/api\/queryData/,'post',(options)=>{
   const totalPage = Math.ceil(tableData.length/pagesize)
   
   const body = JSON.parse(options.body)
-  console.log(body);
+  // console.log(body);
   const queryData = Mock.mock({
-    'tableData|2-9': [{
+    'tableData|2-15': [{
       tuikuan: 'TKD@natural',
       leixing:'@pick(["其他退款", "售后退款"])',
-      tuihuokuan:'￥@float(100,900, 2, 2)',
-      youfei:'￥@float(1,9, 2, 2)',
-      heji:'￥@float(101,909, 2,2)',
+      tuihuokuan:'@float(100,900, 2, 2)',
+      youfei:'@float(1,9, 2, 2)',
+      heji:'',
       zeren:'@pick(["供应商", "顾客", "快递","其他"])',
       sentence:'@csentence(5,20)',
       time: body.endtime,
       shouhou:body.shouhou,
       fenxiao:body.fenxiao,
-      fenxiaoshang:body.distributor,
+      fenxiaoshang:body.fenxiaoshang,
     }],
   })
+  // debugger;
   // const list = pageindex>totalPage?[]:tableData.slice(start,end) 
   return{
     status: 200,
@@ -166,13 +167,14 @@ Mock.mock(/\/localhost\/api\/orderQuery/,'post',(options)=>{
   const totalPage = Math.ceil(tableData.length/pagesize)
   
   const body = JSON.parse(options.body)
-  console.log(body);
+  // console.log(body);
   const orderQuery = Mock.mock({
-    'orderData|2-8': [{
+    'orderData|2-18': [{
       fenxiao: body.fenxiao,
       zhuangtai:'@pick(["已发货"])',
-      youfei:'￥@float(10,20, 2, 2)(￥@natural(0,16).00)',
+      shifu:'@float(5,100, 2, 2)',
       time: body.endtime,
+      youfei:'@natural(0,16).00',
     }],
   })
   // const list = pageindex>totalPage?[]:tableData.slice(start,end) 

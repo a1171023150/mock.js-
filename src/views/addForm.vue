@@ -1,7 +1,12 @@
 <template>
   <div>
-
-    <!-- 新增退款单 -->
+     <c-icon-select @click="showDialog">
+        <template>
+					<i class="el-icon-circle-plus"> </i>
+          <span> 新增退款单</span>
+				</template>
+      </c-icon-select>
+<!-- 新增退款单 -->
     <c-dialog
     title="新增退款单"
     :show='show'
@@ -10,8 +15,7 @@
     cancelBtnText='取 消'
     @close='show=false'
     @cancel='show=false'
-    @confirm='confirm'
-    @change="change"
+    @confirm='saveConfirm'
     >
       <div class="newAddDialog">
         <span style="margin:8px">
@@ -37,31 +41,7 @@
     
     </c-dialog>
 
-
-    <!-- 新增退款单提示弹窗 -->
-    <!-- <c-dialog
-    title="提示"
-    :show='showWarning' 
-    :width='380'
-    confirmBtnText='确 定'
-    cancelBtnText="取 消"
-    @close='showWarning=false'
-    @confirm='showWarning=false'
-    @cancel='showWarning=false'>
-    <span>
-      <svg style="position: relative;
-                   left: 65px;
-                   top: 5px;" t="1616149158764" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4756" width="45" height="45"><path d="M512 0C230.4 0 0 230.4 0 512s230.4 512 512 512 512-230.4 512-512-230.4-512-512-512zM448 256h128v128H448V256z m192 512H384v-64h64V512H384V448h192v256h64v64z" fill="#1296db" p-id="4757"></path></svg>
-      <span style="position: relative;
-                   left: 90px;
-                   top: -11px;">带<span style="color:red">*</span>项为必填项</span>
-    </span>
-    </c-dialog> -->
-    
-
-    <!-- 选择更多订单 -->
-
-    <!-- <choose-order :show-order="showOrder" @hejia='refund'/> -->
+<!-- 选择更多订单 -->
     <div>
       <c-dialog
       title="选择订单"
@@ -70,7 +50,8 @@
       confirmBtnText='确 定'
       cancelBtnText="取 消"
       @close='showOrder=false'
-      @cancel='showOrder=false'>
+      @cancel='showOrder=false'
+      @confirm="sureConfirm">
       <div class="query">
         <div>
           <!-- 下单时间 -->
@@ -99,11 +80,13 @@
         </div>
       </div>
       
-      <!-- 分页 -->
+        <!-- 分页 -->
       <div class="page">
         <c-pagination  :page='pageNo'  :total='total'  :pageSize='pageSize'  @pageChange='pageChange'></c-pagination>
       </div>
-      <!-- 表格 -->
+
+
+<!-- 表格 -->
 
       <vxe-table
         border
@@ -135,7 +118,12 @@
         <vxe-table-column type="checkbox" width="60"></vxe-table-column>
         <vxe-table-column field="fenxiao" title="分销订单号"></vxe-table-column>
         <vxe-table-column field="zhuangtai" title="系统单状态"></vxe-table-column>
-        <vxe-table-column field="youfei" title="分销实付(分销邮费)"></vxe-table-column>
+        <vxe-table-column field="shifu" title="分销实付(分销邮费)">
+          <template v-slot:edit="{ row }">
+          <vxe-input type="number" v-model="row.shifu"></vxe-input>
+          </template>
+          <template v-slot="{ row }">￥{{ row.shifu}} (￥{{row.youfei}})</template>
+        </vxe-table-column>
         <vxe-table-column field="time" title="下单时间" show-overflow></vxe-table-column>
       </vxe-table>
       </c-dialog>
@@ -152,28 +140,18 @@ import axios from 'axios'
 
 export default {
   name: 'AddFrom',
-  props: {
-    show: {
-      type:Boolean,
-      default:true,
-    }
-  },
-  components: {
-    // chooseOrder,
-  },
   data () {
     return {
-      // 保存show的值
-      IsShow: this.show,
+      show: false,
       // 关联订单
-      guanlianOrder:undefined,
-      showOrder:false,
+      guanlianOrder:'',
+      showOrder: false,
       // 退款金额
-      refundMoney:undefined,
+      refundMoney:'',
       // 退款原因
-      refundReason:"",
+      refundReason: undefined,
       // 分销商
-      distributor: undefined,
+      distributor:'',
       distributorTreeList: [
         {label: '1', value: 1,}
       ],
@@ -181,39 +159,40 @@ export default {
         label: 'label',
         value: 'value',
       },
-    // 更多订单
+      // 更多订单
       showOrder:false,
-    // 下单时间
+      // 下单时间
       startTime: undefined,
       endTime: undefined,
-    // 分销订单号
-      distributionOrder:undefined,
-    // 分页
+      // 分销订单号
+      distributionOrder: undefined,
+      // 分页
       pageNo: 1,
       total: 0,
       pageSize: 10,
-    // 表格
+      // 表格
       orderData: [],
-      heji:''
-    }
-  },
-  computed: {
-    
-  },
-  // 监听show的状态
-  watch: {
-    show(val){
-      this.IsShow=val
+      // heji:''
+      // 选择row
+      aRecords:[],
     }
   },
   
   methods: {
+    // 新增退款单
+    showDialog () {
+      this.show = true;
+      // this.distributor = "";
+      this.guanlianOrder = '';
+      this.refundMoney = '';
+      this.refundReason = undefined
+    },
     // 退款金额
     refund(data) {
       this.refundMoney = data
     },
     // 保存按钮
-    confirm() {
+    saveConfirm() {
       if (!this.distributor) {
         this.$cMsgBox.show('请选择分销商')
         return
@@ -233,42 +212,45 @@ export default {
     // 保存数据 post请求
        axios.post('/localhost/api/tableData',{
         fenxiaoshang:this.distributor,
-        tuihuokuan:this.refundMoney,
+        youfei:this.refundMoney,
         sentence:this.refundReason
       }).then(res=>{
-        console.log(res);
-        console.log(res.data.total);
         this.$emit("pageTotal",res.data.total)
-        // this.$bus.$emit("tableData",tabledata)
       }) 
+        this.show = false;
+
+        // 表格数据请求 
+        axios.post('/localhost/api/queryData',{
+        params: {
+        pageindex: this.pageNo,
+        pagesize: this.pageSize,
+        }
+      }).then(res=>{
+        // 查询表格数据
+        this.tableData = res.data.list
+        //查询条数 
+        this.total = res.data.total
+      })
+
     },
 
     //关联订单更多按钮
     more() {
-      console.log("更多");
+      // console.log("更多");
       if (!this.distributor) {
         this.$cMsgBox.show('请先选择分销商')
         return
       }
         this.showOrder = true;
+
+        this.guanlianOrder = '';
+        this.refundMoney = '';
+        this.refundReason = undefined
     },
     
-    // 通知父组件关闭弹窗
-    cancel () {
-      this.$emit('close',this.show)
-    },
-    close () {
-      this.$emit('close',this.show)
-    },
-
-    change(e) {
-      this.$emit('change', e)
-    },
-
-
     // 更多订单
 
-     // 查询
+    // 查询
     queryClick() {
        axios.post('/localhost/api/orderQuery',{
         fenxiao:this.distributionOrder,
@@ -279,9 +261,8 @@ export default {
       }
       }).then(res=>{
         // 查询表格数据
-        console.log(res);
         this.orderData = res.data.list
-        //查询条数 
+        //查询条数
         this.total = res.data.total
       })
     },
@@ -299,7 +280,6 @@ export default {
     pageChange ({ size, page }) {
       this.pageSize = size
       this.pageNo = page
-      // this.getTable()
          // 请求表格数据
       axios.get('/localhost/api/orderData',{
       params: {
@@ -311,24 +291,37 @@ export default {
         this.orderData = res.data.list
       })
     },
-    // getTable(){},
     // 表格
-    selectAllEvent ({ checked, records }) {
+    selectAllEvent({ checked, records }) {
       console.log(checked ? '所有勾选事件' : '所有取消事件', records)
+       this.aRecords = records
     },
-    selectChangeEvent ({ records }) {
-      for( let i in records){
-          this.heji+=parseFloat (records[i].youfei.slice(1,5))
-        }
-        console.log(this.heji);
-        console.log( parseFloat( records[0].youfei.slice(1,5) )+ parseFloat(records[1].youfei.slice(1,5)));
- 
-      
-    },
-    getSelectEvent () {
+    getSelectEvent() {
       let selectRecords = this.$refs.xTable1.getCheckboxRecords()
       this.$XModal.alert(selectRecords.length)
     },
+    selectChangeEvent({ records }) {
+      this.aRecords = records
+    },
+
+    // 确定按钮
+    sureConfirm() {
+
+      let amount = 0
+      let arr = []
+      this.aRecords.forEach((val,i) => {
+        arr += (val.fenxiao)+' '
+        amount += parseFloat(val.youfei)
+      });
+        this.refundMoney = amount.toFixed(2)
+        this.guanlianOrder = arr
+        // this.guanlianOrder = arr.join()
+        this.showOrder = false;
+
+        // this.guanlianOrder = this.aRecords.map(item => {
+        //   return item.tradeNo
+        // }).join()
+    }
   },
 
   created () {
@@ -373,5 +366,8 @@ export default {
 /* 分页 */
 .page {
   margin: 8px;
+}
+i {
+  color: #558364;
 }
 </style>
