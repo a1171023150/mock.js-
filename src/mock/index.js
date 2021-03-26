@@ -133,7 +133,7 @@ Mock.mock(/\/localhost\/api\/queryData/,'post',(options)=>{
   const body = JSON.parse(options.body)
   // console.log(body);
   const queryData = Mock.mock({
-    'tableData|2-15': [{
+    'tableData|2-10': [{
       tuikuan: 'TKD@natural',
       leixing:'@pick(["其他退款", "售后退款"])',
       tuihuokuan:'@float(100,900, 2, 2)',

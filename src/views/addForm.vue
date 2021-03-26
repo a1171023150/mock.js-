@@ -1,142 +1,72 @@
-<template>
-  <div>
-     <c-icon-select @click="showDialog">
-        <template>
-					<i class="el-icon-circle-plus"> </i>
-          <span> 新增退款单</span>
-				</template>
-      </c-icon-select>
-<!-- 新增退款单 -->
-    <c-dialog
-    title="新增退款单"
-    :show='show'
-    :width='380'
-    confirmBtnText='保 存'
-    cancelBtnText='取 消'
-    @close='show=false'
-    @cancel='show=false'
-    @confirm='saveConfirm'
-    >
-      <div class="newAddDialog">
-        <span style="margin:8px">
-          <span style="color:red;margin-left:1em">*</span><span>分销商：</span>
-          <c-select-input v-model="distributor" :list="distributorTreeList" labelName="label" width=240 :defaultProps="defaultProps" empty ></c-select-input>
-        </span>
-        <span style="margin:8px">
-          <span style="color:red">*</span><span>关联订单：</span>
-          <c-input v-model="guanlianOrder" more close width='240' @click="more">
-          </c-input>
-        </span>
-        <span style="margin:8px">
-          <span style="color:red">*</span><span>退款金额：</span>
-          <el-input style="width:240px" v-model="refundMoney" clearable>
-          </el-input> 
-        </span>
-        <span style="margin:8px">
-          <span style="color:red">*</span><span>退款原因：</span>
-          <el-input style="width:240px" v-model="refundReason" clearable>
-          </el-input>
-        </span>
-      </div>
-    
-    </c-dialog>
-
-<!-- 选择更多订单 -->
-    <div>
-      <c-dialog
-      title="选择订单"
-      :show='showOrder' 
-      :width='800'
-      confirmBtnText='确 定'
-      cancelBtnText="取 消"
-      @close='showOrder=false'
-      @cancel='showOrder=false'
-      @confirm="sureConfirm">
-      <div class="query">
-        <div>
-          <!-- 下单时间 -->
-          <span>
-            <label class="label-4-width"> 下单时间：</label>
-            <el-date-picker class="time-input" size="mini" v-model="startTime" value-format="yyyy-MM-ddTHH:mm:ss.000+0800" default-time="00:00:00" type="datetime" placeholder="开始时间">
-            </el-date-picker>
-            -
-            <el-date-picker class="time-input" size="mini" v-model="endTime" value-format="yyyy-MM-ddTHH:mm:ss.000+0800" default-time="23:59:59" type="datetime" placeholder="结束时间">
-            </el-date-picker>
-          </span>
-          <!-- 分销订单号 -->
-          <span>
-            <label class="label-5-width"> 分销订单号：</label>
-            <el-input class="input-w--100" v-model="distributionOrder" @keyup.enter.native="queryClick" clearable>
-            </el-input>
-          </span>
-        </div>
-        
-
-        <div class="queryBox">
-        <!-- 查询 -->
-          <c-button style="width:44px" type="primary" @click="queryClick">查 询</c-button>
-        <!-- 重置 -->
-          <c-button style="width:44px" @click="resetClick">重 置</c-button>
-        </div>
-      </div>
-      
-        <!-- 分页 -->
-      <div class="page">
-        <c-pagination  :page='pageNo'  :total='total'  :pageSize='pageSize'  @pageChange='pageChange'></c-pagination>
-      </div>
-
-
-<!-- 表格 -->
-
-      <vxe-table
-        border
-        ref="xTable1"
-        :data="orderData"
-        @checkbox-all="selectAllEvent"
-        @checkbox-change="selectChangeEvent"
-        size="mini"
-        height="300px"
-        stripe
-        resizable
-        column-key
-        show-overflow="title"
-        show-header-overflow="title"
-        sync-resize
-        auto-resize
-        :sort-config="{orders:['asc', 'desc'],trigger:'cell'}"
-        :checkbox-config="{reserve: true}"
-        highlight-current-row
-        highlight-hover-row
-        row-id="_xid"
-        align="center"
-        header-align="center">
-        <vxe-table-column type="seq" width="40" align="center" fixed="left">
-          <template v-slot:header>
-            <i class="el-icon-more" style="transform: rotate(90deg)"></i>
-          </template>
-        </vxe-table-column>
-        <vxe-table-column type="checkbox" width="60"></vxe-table-column>
-        <vxe-table-column field="fenxiao" title="分销订单号"></vxe-table-column>
-        <vxe-table-column field="zhuangtai" title="系统单状态"></vxe-table-column>
-        <vxe-table-column field="shifu" title="分销实付(分销邮费)">
-          <template v-slot:edit="{ row }">
-          <vxe-input type="number" v-model="row.shifu"></vxe-input>
-          </template>
-          <template v-slot="{ row }">￥{{ row.shifu}} (￥{{row.youfei}})</template>
-        </vxe-table-column>
-        <vxe-table-column field="time" title="下单时间" show-overflow></vxe-table-column>
-      </vxe-table>
-      </c-dialog>
-    </div>
-
-  </div>
+<template lang="pug">
+div
+  c-icon-select(@click='showDialog')
+    template
+      i.el-icon-circle-plus  
+      span  新增退款单
+  //- 新增退款单
+  c-dialog(title='新增退款单' :show='show' :width='380' confirmbtntext='保 存' cancelbtntext='取 消' @close='show=false' @cancel='show=false' @confirm='saveConfirm')
+    .newAddDialog
+      span(style='margin:8px')
+        span(style='color:red;margin-left:1em') *
+        span 分销商：
+        c-select(v-model='distributor' :options='distributorTreeList' multiple='' search='' width='240px' idname='value' labelname='label')
+      span(style='margin:8px')
+        span(style='color:red') *
+        span 关联订单：
+        c-input(v-model='guanlianOrder' more close width='240' @click='more')
+      span(style='margin:8px')
+        span(style='color:red') *
+        span 退款金额：
+        el-input(style='width:240px' v-model='refundMoney' clearable='')
+      span(style='margin:8px')
+        span(style='color:red') *
+        span 退款原因：
+        el-input(style='width:240px' v-model='refundReason' clearable='')
+  //- 选择更多订单
+  div
+    c-dialog(title='选择订单' :show='showOrder' :width='800' confirmbtntext='确 定' cancelbtntext='取 消' @close='showOrder=false' @cancel='showOrder=false' @confirm='sureConfirm')
+      .query
+        div
+          //- 下单时间
+          span
+            label.label-4-width  下单时间：
+            el-date-picker.time-input(size='mini' v-model='startTime' value-format='yyyy-MM-ddTHH:mm:ss.000+0800' default-time='00:00:00' type='datetime' placeholder='开始时间')
+            |             -
+            el-date-picker.time-input(size='mini' v-model='endTime' value-format='yyyy-MM-ddTHH:mm:ss.000+0800' default-time='23:59:59' type='datetime' placeholder='结束时间')
+          //- 分销订单号
+          span
+            label.label-5-width  分销订单号：
+            el-input.input-w--100(v-model='distributionOrder' @keyup.enter.native='queryClick' clearable='')
+        .queryBox
+          //- 查询
+          c-button(style='width:44px' type='primary' @click='queryClick') 查 询
+          //- 重置
+          c-button(style='width:44px' @click='resetClick') 重 置
+      //- 分页
+      .page
+        c-pagination(:page='pageNo' :total='total' :pagesize='pageSize' @pagechange='pageChange')
+      //- 表格
+      vxe-table(border='' ref='xTable1' :data='orderData' @checkbox-all='selectAllEvent' @checkbox-change='selectChangeEvent'
+      size='mini' height='300px' stripe='' resizable='' column-key='' show-overflow='title' show-header-overflow='title' 
+      sync-resize='' auto-resize='' :sort-config="{orders:['asc', 'desc'],trigger:'cell'}" :checkbox-config='{reserve: true}' 
+      highlight-current-row='' highlight-hover-row='' row-id='_xid' align='center' header-align='center')
+        vxe-table-column(type='seq' width='40' align='center' fixed='left')
+          template(v-slot:header='')
+            i.el-icon-more(style='transform: rotate(90deg)')
+        vxe-table-column(type='checkbox' width='60')
+        vxe-table-column(field='fenxiao' title='分销订单号')
+        vxe-table-column(field='zhuangtai' title='系统单状态')
+        vxe-table-column(field='shifu' title='分销实付(分销邮费)')
+          template(v-slot:edit='{ row }')
+            vxe-input(type='number' v-model='row.shifu')
+          template(v-slot='{ row }') ￥{{ row.shifu}} (￥{{row.youfei}})
+        vxe-table-column(field='time' title='下单时间' show-overflow='')
 </template>
 
 <script>
 import mock from '@/mock'
 import axios from 'axios'
-
-// import chooseOrder from './chooseOrder'
 
 export default {
   name: 'AddFrom',
@@ -151,14 +81,8 @@ export default {
       // 退款原因
       refundReason: undefined,
       // 分销商
-      distributor:'',
-      distributorTreeList: [
-        {label: '1', value: 1,}
-      ],
-      defaultProps: {
-        label: 'label',
-        value: 'value',
-      },
+      distributor:[],
+      distributorTreeList: [],
       // 更多订单
       showOrder:false,
       // 下单时间
@@ -344,14 +268,12 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
 
+<style lang="scss" scoped>
 .newAddDialog {
   display: flex;
   flex-direction :column;
 }
-
-
 // 更多订单样式
 /* 顶部查询样式 */
 .query {
